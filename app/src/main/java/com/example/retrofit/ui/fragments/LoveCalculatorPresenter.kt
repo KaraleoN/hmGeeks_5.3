@@ -1,5 +1,6 @@
 package com.example.retrofit.ui.presenter
 
+import com.example.retrofit.MyApplication
 import com.example.retrofit.data.Services.RetrofitService
 import com.example.retrofit.data.model.PercentageModel
 import retrofit2.Call
@@ -17,7 +18,9 @@ class LoveCalculatorPresenter(private val view: ILoveCalculatorView) : ILoveCalc
         ).enqueue(object : Callback<PercentageModel> {
             override fun onResponse(call: Call<PercentageModel>, response: Response<PercentageModel>) {
                 if (response.isSuccessful && response.body() != null) {
-                    view.showResult(response.body()!!)
+                    val percentageModel = response.body()!!
+                    view.showResult(percentageModel)
+                    saveResultToDatabase(percentageModel)
                 } else {
                     view.showError("Ошибка: ${response.message()}")
                 }
@@ -27,5 +30,9 @@ class LoveCalculatorPresenter(private val view: ILoveCalculatorView) : ILoveCalc
                 view.showError("Не удалось загрузить данные: ${t.localizedMessage}")
             }
         })
+    }
+
+    private fun saveResultToDatabase(percentageModel: PercentageModel) {
+        MyApplication.database.loveDao().insertResult(percentageModel)
     }
 }
